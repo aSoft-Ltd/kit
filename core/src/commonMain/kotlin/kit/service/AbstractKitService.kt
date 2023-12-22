@@ -12,12 +12,11 @@ import kotlin.time.TimeSource
 abstract class AbstractKitService(protected var dir: String) : KitService {
 
     override suspend fun submodules(): List<Module> {
-        val output = proc(dir, "git", "submodule", "status").await().output
-        println("Output")
-        output.forEach {
+        return proc(dir, "git", "submodule", "status").await().output.map {
+            Module(it.substringAfter("").substringBefore(" ("))
+        }.onEach {
             println(it)
         }
-        return 75
     }
 
     override fun status() = flow {

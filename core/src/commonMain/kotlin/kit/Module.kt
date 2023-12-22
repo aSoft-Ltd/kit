@@ -1,6 +1,6 @@
 package kit
 
-class Module(
+data class Module(
     val name: String
 ) {
     val path = name
