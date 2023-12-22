@@ -9,17 +9,19 @@ import com.jakewharton.mosaic.ui.Text
 import kit.CommandResult
 import kit.ModuleImportance
 import kit.ModuleResult
+import kit.aggregate
 import kit.service.KitService
 
 internal suspend fun MosaicScope.Add(service: KitService, verbose: Boolean) {
     var state by mutableStateOf(CommandResult(emptyList()))
     setContent {
         Column {
-            Text("${state.status.toEmoji()} ${state.percent}%")
+            val status = state.modules.map { it.importance().status }.aggregate()
+            Text("${status.toEmoji()} ${state.percent}%")
             state.modules.forEach {
                 val importance = it.importance()
-                if (verbose || importance.status) {
-                    Text("${it.status.toEmoji()} ${it.module.name}: ${importance.text}")
+                if (verbose || importance.show) {
+                    Text("${importance.status.toEmoji()} ${it.module.name}: ${importance.text}")
                 }
             }
         }
@@ -30,19 +32,22 @@ internal suspend fun MosaicScope.Add(service: KitService, verbose: Boolean) {
 private fun ModuleResult.importance() = when (val s = status) {
     is ModuleResult.Status.Executing -> ModuleImportance(
         module = module,
-        status = false,
+        show = false,
+        status = status,
         text = "Executing"
     )
 
     is ModuleResult.Status.Failure -> ModuleImportance(
         module = module,
-        status = true,
+        show = true,
+        status = status,
         text = s.output.joinToString("\n")
     )
 
     is ModuleResult.Status.Success -> ModuleImportance(
         module = module,
-        status = s.output.getOrNull(1)?.contains("nothing to commit") == false,
+        status = status,
+        show = s.output.getOrNull(1)?.contains("nothing to commit") == false,
         text = s.output.joinToString("\n")
     )
 }

@@ -9,4 +9,8 @@ interface KitService {
     fun add(): Flow<CommandResult>
     fun commit(message: String): Flow<CommandResult>
     fun addCommit(message: String): Flow<CommandResult>
+
+    fun fetch(remote: String, branch: String): Flow<CommandResult>
+
+    fun merge(remote: String, branch: String): Flow<CommandResult>
 }

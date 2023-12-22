@@ -9,13 +9,20 @@ import com.jakewharton.mosaic.ui.Text
 import kit.CommandResult
 import kit.ModuleImportance
 import kit.ModuleResult
+import kit.aggregate
 import kit.service.KitService
 
-internal suspend fun MosaicScope.Status(service: KitService, verbose: Boolean) {
+internal suspend fun MosaicScope.Merge(
+    service: KitService,
+    remote: String,
+    branch: String,
+    verbose: Boolean
+) {
     var state by mutableStateOf(CommandResult(emptyList()))
     setContent {
         Column {
-            Text("${state.status.toEmoji()} ${state.percent}%")
+            val status = state.modules.map { it.importance().status }.aggregate()
+            Text("${status.toEmoji()} ${state.percent}%")
             state.modules.forEach {
                 val importance = it.importance()
                 if (verbose || importance.show) {
@@ -24,9 +31,7 @@ internal suspend fun MosaicScope.Status(service: KitService, verbose: Boolean) {
             }
         }
     }
-    service.status().collect {
-        state = it
-    }
+    service.merge(remote, branch).collect { state = it }
 }
 
 private fun ModuleResult.importance() = when (val s = status) {
@@ -37,17 +42,23 @@ private fun ModuleResult.importance() = when (val s = status) {
         text = "Executing"
     )
 
-    is ModuleResult.Status.Failure -> ModuleImportance(
-        module = module,
-        show = true,
-        status = status,
-        text = s.output.joinToString("\n")
-    )
+    is ModuleResult.Status.Failure -> {
+        val text = s.output.joinToString("\n")
+        val pseudoSuccess = text.contains("-> FETCH_HEAD")
+        ModuleImportance(
+            module = module,
+            show = !pseudoSuccess,
+            status = if (pseudoSuccess) ModuleResult.Status.Success(
+                s.output
+            ) else ModuleResult.Status.Failure(s.output),
+            text = text
+        )
+    }
 
     is ModuleResult.Status.Success -> ModuleImportance(
         module = module,
-        status = status,
         show = s.output.getOrNull(1)?.contains("nothing to commit") == false,
+        status = status,
         text = s.output.joinToString("\n")
     )
 }

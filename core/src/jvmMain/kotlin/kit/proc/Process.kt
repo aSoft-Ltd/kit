@@ -5,6 +5,7 @@ import kotlinx.coroutines.runBlocking
 import java.lang.Process as JProcess
 
 actual class Process(val wrapped: JProcess) {
+
     actual suspend fun await(): Result {
         val p = wrapped.onExit().await()
         val out = p.inputStream.bufferedReader().readLines()

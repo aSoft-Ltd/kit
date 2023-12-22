@@ -4,19 +4,7 @@ data class CommandResult(
     val modules: List<ModuleResult>
 ) {
 
-    val status
-        get() = run {
-            if(modules.isEmpty()) {
-                return@run ModuleResult.Status.Executing("executing")
-            }
-            if (modules.all { it.status is ModuleResult.Status.Success }) {
-                ModuleResult.Status.Success(emptyList())
-            } else if(modules.any { it.status is ModuleResult.Status.Failure }) {
-                ModuleResult.Status.Failure(emptyList())
-            } else {
-                ModuleResult.Status.Executing("executing")
-            }
-        }
+    val status get() = modules.map { it.status }.aggregate()
     val percent
         get() = run {
             val done = modules.filterNot {

@@ -3,14 +3,11 @@ package kit.service
 import kit.CommandResult
 import kit.Module
 import kit.ModuleResult
-import kit.proc.Result
 import kit.proc.proc
 import kit.proc.result
-import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.flow
-import kotlin.time.Duration.Companion.seconds
 
 abstract class AbstractKitService(protected var dir: String) : KitService {
 
@@ -31,21 +28,33 @@ abstract class AbstractKitService(protected var dir: String) : KitService {
 
     val home = Module("root", dir)
 
-    override fun status() = flow {
-        val result = submodules()
-        coroutineScope {
-            result.modules.dropLast(1).map {
-                it to proc("$dir/${it.module.path}", "git", "status")
-            }.map { (module, proc) ->
-                module.status = proc.result()
-                proc.destroy()
-                emit(result)
-            }
-
-            val p = proc(dir, "git", "status")
-            result.modules.last().status = p.result()
-            p.destroy()
+    suspend fun FlowCollector<CommandResult>.executeSubmodules(
+        result: CommandResult,
+        vararg command: String
+    ) {
+        result.modules.dropLast(1).map {
+            it to proc("$dir/${it.module.path}", *command)
+        }.map { (module, proc) ->
+            module.status = proc.result()
+            proc.destroy()
             emit(result)
         }
+    }
+
+    suspend fun FlowCollector<CommandResult>.executeRoot(
+        result: CommandResult,
+        vararg command: String
+    ) {
+        val p = proc(dir, *command)
+        result.modules.last().status = p.result()
+        p.destroy()
+        emit(result)
+    }
+
+    override fun status() = flow {
+        val result = submodules()
+        val command = arrayOf("git", "status")
+        executeSubmodules(result, *command)
+        executeRoot(result, *command)
     }
 }

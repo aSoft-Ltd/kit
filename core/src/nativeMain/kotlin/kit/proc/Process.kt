@@ -35,9 +35,11 @@ actual class Process(private val dir: String, val command: List<String>) {
 
     private val out = "/tmp/kit.$id.out.txt"
     private val err = "/tmp/kit.$id.err.txt"
+
+    val cmd = "cd $dir && ${command.joinToString(" ")} 1>$out 2>$err"
+    val pipe = popen(cmd, "r") ?: throw RuntimeException("popen() failed")
+
     actual suspend fun await(): Result {
-        val cmd = "cd $dir && ${command.joinToString(" ")} 1>$out 2>$err"
-        val pipe = popen(cmd, "r") ?: throw RuntimeException("popen() failed")
         pclose(pipe)
         val success = read(out)
         val failure = read(err)
