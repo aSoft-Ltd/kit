@@ -17,7 +17,7 @@ import kit.service.WetRunService
 fun main(vararg args: String) = runMosaicBlocking {
     val flags = args.filter { it.startsWith("-") }.toSet()
     val dry = flags.any { it.contains("dry-run") }
-    val dir = flags.find { it.contains("dir") }?.split("=")?.lastOrNull() ?: ".."
+    val dir = flags.find { it.contains("dir") }?.split("=")?.lastOrNull() ?: "."
     val verbose = flags.any { it.contains("verbose") }
     val service = if (dry) DryRunService(dir) else WetRunService(dir)
 
