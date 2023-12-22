@@ -11,7 +11,7 @@ import kit.ModuleImportance
 import kit.ModuleResult
 import kit.service.KitService
 
-internal suspend fun MosaicScope.Add(service: KitService, verbose: Boolean) {
+internal suspend fun MosaicScope.Commit(service: KitService, message: String, verbose: Boolean) {
     var state by mutableStateOf(CommandResult(emptyList()))
     setContent {
         Column {
@@ -24,7 +24,7 @@ internal suspend fun MosaicScope.Add(service: KitService, verbose: Boolean) {
             }
         }
     }
-    service.add().collect { state = it }
+    service.commit(message).collect { state = it }
 }
 
 private fun ModuleResult.importance() = when (val s = status) {
