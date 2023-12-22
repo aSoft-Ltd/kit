@@ -1,11 +1,11 @@
 package kit.service
 
-import kit.Module
+import kit.CommandResult
 import kotlinx.coroutines.flow.Flow
 
 interface KitService {
 
-    suspend fun submodules() : List<Module>
-    fun status() : Flow<String>
-    fun add() : Flow<String>
+    suspend fun submodules() : CommandResult
+    fun status() : Flow<CommandResult>
+    fun add() : Flow<CommandResult>
 }

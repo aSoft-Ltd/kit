@@ -1,6 +1,7 @@
 package kit.proc
 
 import kotlinx.coroutines.future.await
+import kotlinx.coroutines.runBlocking
 import java.lang.Process as JProcess
 
 actual class Process(val wrapped: JProcess) {
@@ -13,5 +14,10 @@ actual class Process(val wrapped: JProcess) {
         } else {
             Result.Success(out)
         }
+    }
+
+    actual suspend fun destroy() = runBlocking {
+        wrapped.destroyForcibly()
+        Unit
     }
 }
