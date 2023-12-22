@@ -20,7 +20,7 @@ class WetRunService(dir: String) : AbstractKitService(dir) {
     override fun addCommit(message: String) = flow {
         val result = submodules()
         val add = arrayOf("git", "add", ".")
-        val commit = arrayOf("git", "commit", "-m", "message")
+        val commit = arrayOf("git", "commit", "-m", message.safe())
         executeSubmodules(result, *add)
         executeSubmodules(result, *commit)
         executeRoot(result, *add)
