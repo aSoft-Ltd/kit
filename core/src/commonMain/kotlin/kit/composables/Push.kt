@@ -43,7 +43,7 @@ private fun ModuleResult.importance() = when (val s = status) {
 
     is ModuleResult.Status.Failure -> {
         val text = s.output.joinToString("\n")
-        val pseudoSuccess = text.contains("-> FETCH_HEAD")
+        val pseudoSuccess = text.contains("up-to-date") || text.contains("new branch")
         ModuleImportance(
             module = module,
             show = !pseudoSuccess,
