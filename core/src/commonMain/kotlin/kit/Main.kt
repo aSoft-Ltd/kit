@@ -3,6 +3,7 @@ package kit
 import com.jakewharton.mosaic.runMosaicBlocking
 import com.jakewharton.mosaic.ui.Text
 import kit.composables.Add
+import kit.composables.AddCommit
 import kit.composables.Commit
 import kit.composables.Status
 import kit.composables.Usage
@@ -35,7 +36,15 @@ fun main(vararg args: String) = runMosaicBlocking {
         } catch (err: Throwable) {
             setContent { Usage(err.message ?: "Unknown error") }
         }
-
+        is KitCommand.AddCommit -> try {
+            AddCommit(
+                service = service,
+                message = arguments.getOrNull(1) ?: throw IllegalArgumentException("missing commit message"),
+                verbose = verbose
+            )
+        } catch (err: Throwable) {
+            setContent { Usage(err.message ?: "Unknown error") }
+        }
         is KitCommand.Help -> setContent { Usage("Welcome to the help section") }
         is KitCommand.Unknown -> setContent { Usage("Unknown command ${command.name}") }
         null -> setContent { Usage("No command was provided") }
