@@ -1,6 +1,8 @@
 package kit.service
 
+import kit.CommandResult
 import kit.safe
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 
 class WetRunService(dir: String) : AbstractKitService(dir) {
@@ -27,4 +29,5 @@ class WetRunService(dir: String) : AbstractKitService(dir) {
 
     override fun fetch(remote: String, branch: String) = execute("git", "fetch", remote, branch)
     override fun merge(remote: String, branch: String) = execute("git", "merge", "$remote/$branch")
+    override fun push(remote: String, vararg branches: String): Flow<CommandResult> = execute("git", "push", remote, *branches)
 }

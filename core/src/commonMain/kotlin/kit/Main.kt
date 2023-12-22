@@ -6,6 +6,7 @@ import kit.composables.AddCommit
 import kit.composables.Commit
 import kit.composables.Fetch
 import kit.composables.Merge
+import kit.composables.Push
 import kit.composables.Status
 import kit.composables.Usage
 import kit.proc.resolve
@@ -53,6 +54,15 @@ fun main(vararg args: String) = runMosaicBlocking {
             val remote = arguments.getOrNull(1) ?: throw IllegalArgumentException("Missing remote (i.e. origin) name")
             val branch = arguments.getOrNull(2) ?: throw IllegalArgumentException("Missing branch name")
             Merge(service, remote, branch, verbose)
+        } catch (err: Throwable) {
+            setContent { Usage(err.message ?: "Unknown error") }
+        }
+
+        is KitCommand.Push -> try {
+            val remote = arguments.getOrNull(1) ?: throw IllegalArgumentException("Missing remote (i.e. origin) name")
+            val branches = arguments.subList(2, arguments.size).toTypedArray()
+            if (branches.isEmpty()) throw IllegalArgumentException("Must have at least one branch to push to")
+            Push(service, remote, *branches)
         } catch (err: Throwable) {
             setContent { Usage(err.message ?: "Unknown error") }
         }

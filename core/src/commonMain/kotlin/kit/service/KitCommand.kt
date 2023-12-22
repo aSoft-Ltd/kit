@@ -7,11 +7,12 @@ sealed interface KitCommand {
     data object AddCommit : KitCommand
     data object Fetch : KitCommand
     data object Merge : KitCommand
+    data object Push : KitCommand
     data object Help : KitCommand
     data class Unknown(val name: String) : KitCommand
 
     companion object {
-        val entries = listOf(Status, Add, Commit, AddCommit, Fetch, Merge, Help)
+        val entries = listOf(Status, Add, Commit, AddCommit, Fetch, Merge, Push, Help)
         fun parse(command: String?): KitCommand? {
             if (command == null) return null
             if (command == "ac") return AddCommit

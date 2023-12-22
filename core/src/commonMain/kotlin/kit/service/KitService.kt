@@ -13,4 +13,5 @@ interface KitService {
     fun fetch(remote: String, branch: String): Flow<CommandResult>
 
     fun merge(remote: String, branch: String): Flow<CommandResult>
+    fun push(remote: String, vararg branches: String): Flow<CommandResult>
 }
