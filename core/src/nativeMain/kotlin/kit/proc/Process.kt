@@ -68,7 +68,10 @@ actual class Process(private val dir: String, val command: List<String>) {
             while (fgets(buffer.pointed.ptr, MAX_BUFFER, file) != null) {
                 res += buffer.pointed.ptr.toKString()
             }
-            if (ferror(file) != 0) throw RuntimeException("error reading from $path")
+            if (ferror(file) != 0) {
+                fprintf(stderr, "Could not read file '%s': %s", path, strerror(errno))
+                throw RuntimeException("error reading from $path")
+            }
         } catch (err: Throwable) {
             throw err
         } finally {

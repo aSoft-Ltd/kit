@@ -28,6 +28,6 @@ class WetRunService(dir: String) : AbstractKitService(dir) {
     }
 
     override fun fetch(remote: String, branch: String) = execute("git", "fetch", remote, branch)
-    override fun merge(remote: String, branch: String) = execute("git", "merge", "$remote/$branch")
+    override fun merge(branch: String) = execute("git", "merge", branch)
     override fun push(remote: String, vararg branches: String): Flow<CommandResult> = execute("git", "push", remote, *branches)
 }

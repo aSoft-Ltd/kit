@@ -14,7 +14,6 @@ import kit.service.KitService
 
 internal suspend fun MosaicScope.Merge(
     service: KitService,
-    remote: String,
     branch: String,
     verbose: Boolean
 ) {
@@ -31,7 +30,7 @@ internal suspend fun MosaicScope.Merge(
             }
         }
     }
-    service.merge(remote, branch).collect { state = it }
+    service.merge(branch).collect { state = it }
 }
 
 private fun ModuleResult.importance() = when (val s = status) {

@@ -18,6 +18,6 @@ class DryRunService(dir: String) : AbstractKitService(dir) {
     override fun addCommit(message: String) = fake("git", "add", "commit", message)
 
     override fun fetch(remote: String, branch: String) = fake("git", "fetch", remote, branch)
-    override fun merge(remote: String, branch: String) = fake("git", "merge", remote, branch)
+    override fun merge(branch: String) = fake("git", "merge", branch)
     override fun push(remote: String, vararg branches: String) = fake("git", "merge", remote, branches.joinToString(","))
 }

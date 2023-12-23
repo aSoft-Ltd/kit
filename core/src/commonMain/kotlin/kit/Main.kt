@@ -51,9 +51,8 @@ fun main(vararg args: String) = runMosaicBlocking {
         }
 
         is KitCommand.Merge -> try {
-            val remote = arguments.getOrNull(1) ?: throw IllegalArgumentException("Missing remote (i.e. origin) name")
-            val branch = arguments.getOrNull(2) ?: throw IllegalArgumentException("Missing branch name")
-            Merge(service, remote, branch, verbose)
+            val branch = arguments.getOrNull(1) ?: throw IllegalArgumentException("Missing branch name")
+            Merge(service, branch, verbose)
         } catch (err: Throwable) {
             setContent { Usage(err.message ?: "Unknown error") }
         }
