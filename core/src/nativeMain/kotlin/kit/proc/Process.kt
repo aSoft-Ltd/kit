@@ -3,27 +3,23 @@
 package kit.proc
 
 import kotlinx.cinterop.ByteVar
-import kotlinx.cinterop.CPointer
 import kotlinx.cinterop.ExperimentalForeignApi
-import kotlinx.cinterop.alloc
 import kotlinx.cinterop.allocArray
 import kotlinx.cinterop.free
-import kotlinx.cinterop.memScoped
 import kotlinx.cinterop.nativeHeap
 import kotlinx.cinterop.pointed
 import kotlinx.cinterop.ptr
 import kotlinx.cinterop.toKString
-import platform.posix.FILE
-import platform.posix.WEXITED
+import platform.posix.errno
+import platform.posix.fclose
 import platform.posix.ferror
 import platform.posix.fgets
 import platform.posix.fopen
-import platform.posix.fread
-import platform.posix.getenv
-import platform.posix.malloc
+import platform.posix.fprintf
 import platform.posix.pclose
 import platform.posix.popen
-import platform.posix.system
+import platform.posix.stderr
+import platform.posix.strerror
 
 actual class Process(private val dir: String, val command: List<String>) {
 
@@ -36,8 +32,15 @@ actual class Process(private val dir: String, val command: List<String>) {
     private val out = "/tmp/kit.$id.out.txt"
     private val err = "/tmp/kit.$id.err.txt"
 
-    val cmd = "cd $dir && ${command.joinToString(" ")} 1>$out 2>$err"
-    val pipe = popen(cmd, "r") ?: throw RuntimeException("popen() failed")
+    val pipe = run {
+        val cmd = "cd $dir && ${command.joinToString(" ")} 1>$out 2>$err"
+        val pipe = popen(cmd, "r")
+        if (pipe == null) {
+            fprintf(stderr,"failed to open pipe to run '%s': %s",cmd, strerror(errno))
+            throw RuntimeException("popen() failed")
+        }
+        pipe
+    }
 
     actual suspend fun await(): Result {
         pclose(pipe)
@@ -54,7 +57,12 @@ actual class Process(private val dir: String, val command: List<String>) {
     private fun read(path: String): List<String> {
         val MAX_BUFFER = 1024 * 10
         val buffer = nativeHeap.allocArray<ByteVar>(MAX_BUFFER)
-        val file = fopen(path, "r") ?: return emptyList()
+        val file = fopen(path, "r")
+        if (file == null) {
+            fprintf(stderr, "Could not open file '%s': %s", path, strerror(errno))
+            return emptyList()
+        }
+
         var res = ""
         try {
             while (fgets(buffer.pointed.ptr, MAX_BUFFER, file) != null) {
@@ -64,7 +72,7 @@ actual class Process(private val dir: String, val command: List<String>) {
         } catch (err: Throwable) {
             throw err
         } finally {
-            pclose(file)
+            fclose(file)
         }
         nativeHeap.free(buffer)
         return res.split("\n")
