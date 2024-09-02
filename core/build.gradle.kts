@@ -4,6 +4,7 @@ plugins {
     kotlin("multiplatform")
     id("tz.co.asoft.library")
     alias(kotlinz.plugins.compose)
+    kotlin("plugin.compose")
     id("com.jakewharton.mosaic") version "0.10.0"
     application
 }
@@ -23,7 +24,7 @@ kotlin {
         withJava()
         library()
     }
-    val osx = if (Targeting.OSX) osxTargets() else listOf()
+    val osx = if (Targeting.OSX) macOsTargets() else listOf()
     val linux = if (Targeting.LINUX) linuxTargets() else listOf()
     val windows = if (Targeting.MINGW) mingwTargets() else listOf()
 
