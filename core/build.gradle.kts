@@ -5,19 +5,15 @@ plugins {
     id("tz.co.asoft.library")
     alias(kotlinz.plugins.compose)
     kotlin("plugin.compose")
-    id("com.jakewharton.mosaic") version "0.10.0"
-    application
+//    id("com.jakewharton.mosaic") version "0.18.0"
+//    application
 }
 
 description = "Primary building block needed for running concurrent multiplatform code"
 
-application {
-    mainClass = "kit.MainKt"
-}
-
-mosaic {
-    kotlinCompilerPlugin = kotlinz.versions.compose.compiler
-}
+//application {
+//    mainClass = "kit.MainKt"
+//}
 
 kotlin {
     if (Targeting.JVM) jvm {
@@ -39,6 +35,7 @@ kotlin {
     sourceSets {
         val commonMain by getting {
             dependencies {
+                implementation("com.jakewharton.mosaic:mosaic-runtime:0.18.0")
             }
         }
 

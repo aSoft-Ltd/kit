@@ -1,9 +1,11 @@
 package kit.composables
 
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import com.jakewharton.mosaic.MosaicScope
 import com.jakewharton.mosaic.ui.Column
 import com.jakewharton.mosaic.ui.Text
 import kit.CommandResult
@@ -12,25 +14,27 @@ import kit.ModuleResult
 import kit.aggregate
 import kit.service.KitService
 
-internal suspend fun MosaicScope.Push(
+@Composable
+internal fun Push(
     service: KitService,
     remote: String,
     vararg branches: String
 ) {
-    var state by mutableStateOf(CommandResult(emptyList()))
-    setContent {
-        Column {
-            val status = state.modules.map { it.importance().status }.aggregate()
-            Text("${status.toEmoji()} ${state.percent}%")
-            state.modules.forEach {
-                val importance = it.importance()
-                if (importance.show) {
-                    Text("${importance.status.toEmoji()} ${it.module.name}: ${importance.text}")
-                }
+    var state by remember { mutableStateOf(CommandResult(emptyList())) }
+
+    LaunchedEffect(service, remote, *branches) {
+        service.push(remote, *branches).collect { state = it }
+    }
+    Column {
+        val status = state.modules.map { it.importance().status }.aggregate()
+        Text("${status.toEmoji()} ${state.percent}%")
+        state.modules.forEach {
+            val importance = it.importance()
+            if (importance.show) {
+                Text("${importance.status.toEmoji()} ${it.module.name}: ${importance.text}")
             }
         }
     }
-    service.push(remote, *branches).collect { state = it }
 }
 
 private fun ModuleResult.importance() = when (val s = status) {

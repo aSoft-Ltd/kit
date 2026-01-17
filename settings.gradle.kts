@@ -1,5 +1,9 @@
 pluginManagement {
     includeBuild("../build-logic")
+
+    repositories {
+        gradlePluginPortal()
+    }
 }
 
 plugins {
@@ -12,10 +16,6 @@ fun includeSubs(base: String, path: String = base, vararg subs: String) {
         project(":$base-$it").projectDir = File("$path/$it")
     }
 }
-
-listOf(
-    "kommander", "lexi", "kotlinx-interoperable"
-).forEach { includeBuild("../$it") }
 
 rootProject.name = "kit"
 
