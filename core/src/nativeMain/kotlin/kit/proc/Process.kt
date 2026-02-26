@@ -16,8 +16,6 @@ import platform.posix.ferror
 import platform.posix.fgets
 import platform.posix.fopen
 import platform.posix.fprintf
-import platform.posix.pclose
-import platform.posix.popen
 import platform.posix.stderr
 import platform.posix.strerror
 
@@ -29,12 +27,13 @@ actual class Process(private val dir: String, val command: List<String>) {
         var count = 0
     }
 
-    private val out = "/tmp/kit.$id.out.txt"
-    private val err = "/tmp/kit.$id.err.txt"
+    private val out = tmp("kit.$id.out.txt")
+    private val err = tmp("kit.$id.err.txt")
 
     val pipe = run {
         val cmd = "cd $dir && ${command.joinToString(" ")} 1>$out 2>$err"
-        val pipe = popen(cmd, "r")
+//        val pipe = popen(cmd, "r")
+        val pipe = pipeOpen(cmd, "r")
         if (pipe == null) {
             fprintf(stderr,"failed to open pipe to run '%s': %s",cmd, strerror(errno))
             throw RuntimeException("popen() failed")
@@ -43,7 +42,7 @@ actual class Process(private val dir: String, val command: List<String>) {
     }
 
     actual suspend fun await(): Result {
-        pclose(pipe)
+        pipeClose(pipe)
         val success = read(out)
         val failure = read(err)
 

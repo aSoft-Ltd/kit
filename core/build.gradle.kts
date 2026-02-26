@@ -47,7 +47,17 @@ kotlin {
             dependsOn(commonMain)
         }
 
-        native.forEach {
+        val posixMain by creating {
+            dependsOn(nativeMain)
+        }
+
+
+        (osx + linux).forEach {
+            val main by it.compilations.getting
+            main.defaultSourceSet { dependsOn(posixMain) }
+        }
+
+        windows.forEach {
             val main by it.compilations.getting
             main.defaultSourceSet { dependsOn(nativeMain) }
         }

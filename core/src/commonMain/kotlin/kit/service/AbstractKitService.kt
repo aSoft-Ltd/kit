@@ -36,8 +36,8 @@ abstract class AbstractKitService(protected var dir: String) : KitService {
             it to proc("$dir/${it.module.path}", *command)
         }.map { (module, proc) ->
             module.status = proc.result()
-            proc.destroy()
             emit(result)
+            proc.destroy()
         }
     }
 
